@@ -1,81 +1,64 @@
-import React, { Component, RefObject } from 'react';
-import '../styles/TextDisplayComponent.css'; // Импортируем стили для компонента
+import React, { useState, useRef, useEffect } from 'react';
+import '../styles/TextDisplayComponent.css';
 
 interface TextDisplayProps {
   text: string;
 }
 
-interface TextDisplayState {
-  userInput: string;
-  isInputActive: boolean;
-}
+const TextDisplayComponent: React.FC<TextDisplayProps> = ({ text }) => {
+  const [userInput, setUserInput] = useState('');
+  const [isInputActive, setIsInputActive] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-class TextDisplayComponent extends Component<TextDisplayProps, TextDisplayState> {
-  private inputRef: RefObject<HTMLInputElement>;
-
-  constructor(props: TextDisplayProps) {
-    super(props);
-    this.state = {
-      userInput: '',
-      isInputActive: false,
-    };
-    this.inputRef = React.createRef();
-  }
-
-  componentDidMount() {
-    if (this.inputRef.current) {
-      this.inputRef.current.focus();
-      this.inputRef.current.selectionStart = this.state.userInput.length;
-      this.inputRef.current.selectionEnd = this.state.userInput.length;
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.selectionStart = userInput.length;
+      inputRef.current.selectionEnd = userInput.length;
     }
-  }
+  }, []);
 
-  handleTextClick = () => {
-    if (this.inputRef.current) {
-      this.inputRef.current.focus();
-      this.setState({ isInputActive: true });
+  const handleTextClick = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      setIsInputActive(true);
     }
   };
 
-  handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ userInput: event.target.value });
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setUserInput(event.target.value);
   };
 
-  handleInputBlur = () => {
-    this.setState({ isInputActive: false });
+  const handleInputBlur = () => {
+    setIsInputActive(false);
   };
 
-  render() {
-    const { text } = this.props;
-    const { userInput, isInputActive } = this.state;
-
-    return (
-      <div
-        onClick={this.handleTextClick}
-        className={`text-display-container ${isInputActive ? 'active' : ''}`}
-        style={{ cursor: 'text' }}
-      >
-        <div className="text-display" style={{ opacity: isInputActive ? 1 : 0.5 }}>
-          {text.split('').map((char, index) => (
-            <span
-              key={index}
-              className={index < userInput.length ? (userInput[index] === char ? 'correct' : 'incorrect') : ''}
-            >
-              {char}
-            </span>
-          ))}
-        </div>
-        <input
-          ref={this.inputRef}
-          type="text"
-          value={userInput}
-          onChange={this.handleInputChange}
-          onBlur={this.handleInputBlur}
-          className="hidden-input"
-        />
+  return (
+    <div
+      onClick={handleTextClick}
+      className={`text-display-container ${isInputActive ? 'active' : ''}`}
+      style={{ cursor: 'text' }}
+    >
+      <div className="text-display" style={{ opacity: isInputActive ? 1 : 0.5 }}>
+        {text.split('').map((char, index) => (
+          <span
+            key={index}
+            className={index < userInput.length ? (userInput[index] === char ? 'correct' : 'incorrect') : ''}
+          >
+            {char}
+          </span>
+        ))}
       </div>
-    );
-  }
-}
+      <input
+        ref={inputRef}
+        type="text"
+        value={userInput}
+        onChange={handleInputChange}
+        onBlur={handleInputBlur}
+        className="hidden-input"
+      />
+    </div>
+  );
+};
 
 export default TextDisplayComponent;
